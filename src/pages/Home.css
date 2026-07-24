@@ -1,0 +1,51 @@
+/* Full page */
+.home-container {
+  text-align: center;
+  padding: 40px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Title */
+.title {
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Cards container */
+.card-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* Card style */
+.card {
+  background: white;
+  padding: 20px;
+  width: 250px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+/* Hover effect */
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Button */
+button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
