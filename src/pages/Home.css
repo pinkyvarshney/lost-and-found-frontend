@@ -1,67 +1,521 @@
-/* HERO SECTION */
-.hero {
-  height: 90vh;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+/* =========================
+   MAIN HOME
+========================= */
+
+.home-container {
+  min-height: 100vh;
+  padding-bottom: 80px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  font-family: Arial, sans-serif;
+}
+
+
+/* =========================
+   TOP NAVBAR
+========================= */
+
+.top-navbar {
+  height: 70px;
+  padding: 0 30px;
+
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
+
   color: white;
-  text-align: center;
 }
 
-/* Hero content */
-.hero-content h1 {
-  font-size: 45px;
-  margin-bottom: 10px;
+.top-navbar h2 {
+  margin: 0;
+  font-size: 26px;
 }
 
-.hero-content p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
 
-/* Buttons */
-.hero-buttons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-}
+/* Logout */
 
-.hero-buttons button {
-  padding: 12px 20px;
+.logout-btn {
+  padding: 10px 18px;
+
   border: none;
-  background: #ff758c;
-  color: white;
   border-radius: 8px;
+
+  background: white;
+  color: #1e3c72;
+
+  font-size: 15px;
+  font-weight: bold;
+
   cursor: pointer;
-  transition: 0.3s;
 }
 
-.hero-buttons button:hover {
-  background: #ff5a7a;
-  transform: scale(1.1);
+.logout-btn:hover {
+  background: #eeeeee;
 }
 
-/* CARDS */
-.cards {
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.home-content {
+  width: 90%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-section {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 40px;
-  background: #f5f5f5;
-  flex-wrap: wrap;
+
+  margin-top: 25px;
+  margin-bottom: 35px;
 }
 
-.card {
-  width: 250px;
-  padding: 20px;
+.search-box {
+  width: 90%;
+  max-width: 850px;
+
+  height: 60px;
+
   background: white;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  transition: 0.3s;
+
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px 0 20px;
+
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 }
 
-.card:hover {
-  transform: translateY(-10px);
+.search-icon {
+  font-size: 22px;
+  margin-right: 12px;
+}
+
+.search-box input {
+  flex: 1;
+
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  font-size: 17px;
+
+  color: #333;
+}
+
+.search-box input::placeholder {
+  color: #999;
+}
+
+.search-button {
+  border: none;
+
+  background: #2a5298;
+  color: white;
+
+  padding: 12px 22px;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background: #1e3c72;
+}
+
+
+/* =========================
+   LOST / FOUND SECTION
+========================= */
+
+.post-section {
+  background: white;
+
+  border-radius: 25px;
+
+  padding: 25px;
+
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+
+  margin-bottom: 30px;
+}
+
+
+/* =========================
+   POST CARD
+========================= */
+
+.post-card {
+  min-height: 140px;
+
+  border-radius: 18px;
+
+  margin-bottom: 18px;
+
+  padding: 20px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  box-sizing: border-box;
+}
+
+.post-card:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Lost */
+
+.lost-card {
+  background: #fff0f0;
+}
+
+
+/* Found */
+
+.found-card {
+  background: #fffbea;
+}
+
+
+/* Icon */
+
+.post-icon {
+  width: 100px;
+  height: 100px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 55px;
+
+  flex-shrink: 0;
+}
+
+
+/* Text */
+
+.post-content {
+  flex: 1;
+}
+
+.post-content h2 {
+  margin: 0 0 8px 0;
+
+  color: #333;
+
+  font-size: 22px;
+}
+
+.post-content p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+
+/* Post button */
+
+.post-btn {
+  padding: 12px 20px;
+
+  background: white;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+
+/* Lost button */
+
+.lost-btn {
+  border: 2px solid #e9a5a5;
+  color: #d95353;
+}
+
+
+/* Found button */
+
+.found-btn {
+  border: 2px solid #9bd7b1;
+  color: #35945a;
+}
+
+.post-btn:hover {
+  transform: scale(1.05);
+}
+
+
+/* =========================
+   RESULTS
+========================= */
+
+.results-section {
+  margin-bottom: 30px;
+}
+
+.results-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  color: white;
+
+  margin-bottom: 15px;
+}
+
+.results-heading h2 {
+  margin: 0;
+}
+
+.results-heading span {
+  font-size: 14px;
+}
+
+
+/* =========================
+   ITEMS GRID
+========================= */
+
+.items-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(250px, 1fr));
+
+  gap: 18px;
+}
+
+
+/* Item */
+
+.item-card {
+  background: white;
+
+  border-radius: 15px;
+
+  overflow: hidden;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.item-image {
+  height: 120px;
+
+  background: #eeeeee;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 50px;
+}
+
+.item-info {
+  padding: 15px;
+}
+
+.item-info h3 {
+  margin: 0 0 8px;
+
+  font-size: 20px;
+}
+
+.item-info p {
+  color: #666;
+
+  margin: 5px 0 12px;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  font-size: 13px;
+
+  color: #555;
+}
+
+
+/* =========================
+   NO RESULT
+========================= */
+
+.no-result {
+  background: white;
+
+  border-radius: 15px;
+
+  text-align: center;
+
+  padding: 35px;
+
+  margin-top: 15px;
+}
+
+.no-result div {
+  font-size: 45px;
+}
+
+.no-result h3 {
+  margin: 10px 0 5px;
+}
+
+.no-result p {
+  color: #777;
+}
+
+
+/* =========================
+   BOTTOM NAVIGATION
+========================= */
+
+.bottom-nav {
+  position: fixed;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  height: 65px;
+
+  background: #111;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  color: white;
+
+  z-index: 1000;
+}
+
+.nav-item {
+  text-align: center;
+
+  cursor: pointer;
+
+  min-width: 100px;
+}
+
+.nav-item span {
+  font-size: 22px;
+}
+
+.nav-item p {
+  margin: 3px 0 0;
+
+  font-size: 13px;
+}
+
+.nav-item:hover {
+  color: #8ec5ff;
+}
+
+.nav-item.active {
+  color: #8ec5ff;
+}
+
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+
+  .top-navbar {
+    padding: 0 15px;
+  }
+
+  .top-navbar h2 {
+    font-size: 20px;
+  }
+
+  .home-content {
+    width: 94%;
+  }
+
+  /* Search */
+
+  .search-box {
+    width: 100%;
+    height: 55px;
+  }
+
+  .search-box input {
+    font-size: 14px;
+  }
+
+  .search-button {
+    padding: 9px 13px;
+    font-size: 13px;
+  }
+
+  /* Cards */
+
+  .post-section {
+    padding: 15px;
+  }
+
+  .post-card {
+    padding: 15px;
+
+    gap: 10px;
+  }
+
+  .post-icon {
+    width: 65px;
+    height: 65px;
+
+    font-size: 38px;
+  }
+
+  .post-content h2 {
+    font-size: 17px;
+  }
+
+  .post-content p {
+    font-size: 12px;
+  }
+
+  .post-btn {
+    padding: 9px 12px;
+
+    font-size: 12px;
+  }
+
+  /* Bottom */
+
+  .nav-item {
+    min-width: 70px;
+  }
+
 }

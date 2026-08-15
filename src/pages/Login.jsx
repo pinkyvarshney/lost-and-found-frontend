@@ -1,91 +1,156 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    setError("");
+
     if (!email || !password) {
-      alert("Please fill all fields");
+      setError("Please enter email and password");
       return;
     }
 
-    navigate("/home");
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/auth/login",
+        {
+          email: email,
+          password: password,
+        }
+      );
+
+      console.log("LOGIN RESPONSE:", res.data);
+
+      // Token save
+      localStorage.setItem("token", res.data.token);
+
+      // Direct Home page
+      navigate("/home");
+
+    } catch (err) {
+      console.error("LOGIN ERROR:", err.response?.data || err.message);
+
+      // Stylish error message
+      setError("Incorrect email or password ❌");
+    }
   };
 
   return (
     <div
       style={{
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-
-        // ✅ SIMPLE BACKGROUND (NO BUG)
         background: "linear-gradient(135deg, #5f2c82, #49a09d)",
+        padding: "20px",
       }}
     >
       <div
         style={{
           width: "350px",
-          padding: "30px",
+          maxWidth: "100%",
+          padding: "35px",
           borderRadius: "20px",
-          textAlign: "center",
-
           background: "white",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+          boxShadow: "0 15px 40px rgba(0,0,0,0.25)",
+          textAlign: "center",
         }}
       >
-        <div style={{ fontSize: "40px" }}>🔍</div>
+        <h1
+          style={{
+            marginBottom: "10px",
+            color: "#333",
+          }}
+        >
+          Lost & Found 🔍
+        </h1>
 
-        <h1>Lost & Found</h1>
-        <p style={{ color: "gray" }}>Find what you lost</p>
+        <p
+          style={{
+            color: "#777",
+            marginBottom: "25px",
+          }}
+        >
+          Login to continue
+        </p>
 
+        {/* Email */}
         <input
-          type="text"
-          placeholder="Enter Email"
+          type="email"
+          placeholder="📧 Enter Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
             width: "100%",
-            padding: "12px",
-            margin: "10px 0",
+            boxSizing: "border-box",
+            padding: "13px",
+            marginBottom: "15px",
             borderRadius: "10px",
             border: "1px solid #ccc",
+            outline: "none",
+            fontSize: "15px",
           }}
         />
 
+        {/* Password */}
         <input
           type="password"
-          placeholder="Enter Password"
+          placeholder="🔒 Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
             width: "100%",
-            padding: "12px",
-            margin: "10px 0",
+            boxSizing: "border-box",
+            padding: "13px",
+            marginBottom: "15px",
             borderRadius: "10px",
             border: "1px solid #ccc",
+            outline: "none",
+            fontSize: "15px",
           }}
         />
 
+        {/* Error */}
+        {error && (
+          <div
+            style={{
+              background: "#ffe6e6",
+              color: "#d32f2f",
+              padding: "10px",
+              borderRadius: "8px",
+              marginBottom: "15px",
+              fontSize: "14px",
+              fontWeight: "600",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Login Button */}
         <button
           onClick={handleLogin}
           style={{
             width: "100%",
-            padding: "12px",
-            marginTop: "15px",
-            background: "#5f2c82",
-            color: "white",
+            padding: "13px",
             border: "none",
             borderRadius: "10px",
+            background: "linear-gradient(135deg, #5f2c82, #49a09d)",
+            color: "white",
+            fontSize: "16px",
+            fontWeight: "bold",
             cursor: "pointer",
           }}
         >
-          Login
+          Login →
         </button>
       </div>
     </div>

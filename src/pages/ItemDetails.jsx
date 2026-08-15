@@ -1,48 +1,648 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import { useState } from "react";
+import "./ItemDetails.css";
 
 export function ItemDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [item, setItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // ================= GET ITEM DETAILS =================
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          navigate("/");
+          return;
+        }
+
+        const response = await fetch(
+          `http://localhost:8080/items/${id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load item");
+        }
+
+        const data = await response.json();
+
+        console.log("ITEM DETAILS:", data);
+
+        setItem(data);
+
+      } catch (error) {
+        console.error("ITEM ERROR:", error);
+        setError("Unable to load item details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItem();
+  }, [id, navigate]);
+
+
+  // ================= SEND CLAIM =================
+  const handleSubmit = async () => {
+
+    if (!message.trim()) {
+      alert("Please enter a message");
+      return;
+    }
+
+    try {
+      setClaimLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Please login again");
+        navigate("/");
+        return;
+      }
+
+      // ================= JWT PAYLOAD =================
+
+      const payload = JSON.parse(
+        atob(token.split(".")[1])
+      );
+
+      console.log("JWT PAYLOAD:", payload);
+
+      /*
+       * Talend ke according backend ko:
+       *
+       * {
+       *   itemId,
+       *   requesterId,
+       *   message
+       * }
+       *
+       * chahiye.
+       */
+
+      const requesterId =
+        payload.userId ||
+        payload.id ||
+        payload.user_id;
+
+      if (!requesterId) {
+        console.error(
+          "Requester ID not found in JWT:",
+          payload
+        );
+
+        alert(
+          "User ID not found in token. Please login again."
+        );
+
+        return;
+      }
+
+
+      // ================= CLAIM API =================
+
+      const response = await fetch(
+        "http://localhost:8080/claims",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            itemId: Number(id),
+            requesterId: Number(requesterId),
+            message: message.trim(),
+          }),
+        }
+      );
+
+
+      // Response ko safely handle karo
+      const contentType =
+        response.headers.get("content-type");
+
+      let data;
+
+      if (
+        contentType &&
+        contentType.includes("application/json")
+      ) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+
+      console.log("CLAIM STATUS:", response.status);
+      console.log("CLAIM RESPONSE:", data);
+
+
+      // ================= ERROR =================
+
+      if (!response.ok) {
+
+        let errorMessage = "Failed to send claim";
+
+        if (typeof data === "string") {
+          errorMessage = data;
+        } else if (data?.message) {
+          errorMessage = data.message;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+
+      // ================= SUCCESS =================
+
+      alert("✅ Claim sent successfully!");
+
+      setShowModal(false);
+      setMessage("");
+
+    } catch (error) {
+
+      console.error("CLAIM ERROR:", error);
+
+      alert(
+        "❌ " +
+        (error.message || "Error sending claim")
+      );
+
+    } finally {
+
+      setClaimLoading(false);
+
+    }
+  };
+
+
+  // ================= LOADING =================
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+
+        <div className="details-page">
+          <div className="loading-card">
+            <div className="loading-icon">📦</div>
+
+            <h2>Loading item...</h2>
+
+            <p>
+              Please wait while we fetch the item
+              details.
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+
+  // ================= ERROR =================
+
+  if (error || !item) {
+    return (
+      <>
+        <Navbar />
+
+        <div className="details-page">
+
+          <div className="error-card">
+
+            <div className="error-icon">
+              ❌
+            </div>
+
+            <h2>
+              Unable to Load Item
+            </h2>
+
+            <p>
+              {error || "Item not found"}
+            </p>
+
+            <button
+              className="back-btn"
+              onClick={() => navigate("/home")}
+            >
+              ← Back to Home
+            </button>
+
+          </div>
+
+        </div>
+      </>
+    );
+  }
+
+
+  // ================= MAIN UI =================
 
   return (
     <>
       <Navbar />
-      <div className="p-4">
-        <h1 className="text-xl font-bold">Item {id}</h1>
-        <p>Description: Lost wallet</p>
-        <p>Location: Library</p>
+
+      <div className="details-page">
+
+        {/* ================= BACK BUTTON ================= */}
 
         <button
-          className="bg-blue-500 text-white p-2 mt-4"
-          onClick={() => setShowModal(true)}
+          className="back-btn"
+          onClick={() => navigate("/home")}
         >
-          This is mine
+          ← Back to Items
         </button>
 
-        {showModal && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-4">
-              <h2>Claim Item</h2>
-              <textarea
-                className="border w-full p-2"
-                placeholder="Enter message"
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <button className="bg-green-500 text-white p-2 mt-2">
-                Submit
-              </button>
-              <button
-                className="ml-2"
-                onClick={() => setShowModal(false)}
-              >
-                Close
-              </button>
-            </div>
+
+        {/* ================= MAIN CARD ================= */}
+
+        <div className="details-card">
+
+
+          {/* ================= ITEM IMAGE ================= */}
+
+          <div className="item-image">
+            📦
           </div>
+
+
+          {/* ================= ITEM TYPE ================= */}
+
+          <div
+            className={`item-type ${
+              item.title === "found"
+                ? "found-type"
+                : "lost-type"
+            }`}
+          >
+            {item.title === "found"
+              ? "🟢 FOUND ITEM"
+              : "🔴 LOST ITEM"}
+          </div>
+
+
+          {/* ================= ITEM NAME ================= */}
+
+          <h1 className="item-name">
+            {item.itemName || "Unnamed Item"}
+          </h1>
+
+
+          {/* ================= DESCRIPTION ================= */}
+
+          <div className="detail-row">
+
+            <span className="detail-icon">
+              📝
+            </span>
+
+            <div className="detail-info">
+
+              <small>
+                Description
+              </small>
+
+              <p>
+                {item.description ||
+                  "No description available"}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* ================= LOCATION ================= */}
+
+          <div className="detail-row">
+
+            <span className="detail-icon">
+              📍
+            </span>
+
+            <div className="detail-info">
+
+              <small>
+                Location
+              </small>
+
+              <p>
+                {item.location ||
+                  "Not specified"}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* ================= DATE ================= */}
+
+          <div className="detail-row">
+
+            <span className="detail-icon">
+              📅
+            </span>
+
+            <div className="detail-info">
+
+              <small>
+                Date
+              </small>
+
+              <p>
+                {item.date ||
+                  "Not specified"}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* ================= USER ================= */}
+
+          <div className="detail-row">
+
+            <span className="detail-icon">
+              👤
+            </span>
+
+            <div className="detail-info">
+
+              <small>
+                Posted By
+              </small>
+
+              <p>
+                User{" "}
+                {item.userId ||
+                  "Unknown"}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* ================= STATUS ================= */}
+
+          <div className="status-box">
+
+            <span>
+              📌 Status
+            </span>
+
+            <strong>
+              {item.title || "Unknown"}
+            </strong>
+
+          </div>
+
+
+          {/* ================= CLAIM SECTION ================= */}
+
+          {item.title === "lost" && (
+
+            <div className="claim-section">
+
+              <div className="claim-content">
+
+                <div className="claim-icon-small">
+                  🤝
+                </div>
+
+                <div>
+
+                  <h2>
+                    Is this your item?
+                  </h2>
+
+                  <p>
+                    If you believe this item
+                    belongs to you, send a
+                    claim request to the
+                    person who posted it.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <button
+                className="claim-btn"
+                onClick={() =>
+                  setShowModal(true)
+                }
+              >
+                🤝 This is Mine
+              </button>
+
+            </div>
+
+          )}
+
+
+          {/* ================= FOUND ITEM MESSAGE ================= */}
+
+          {item.title === "found" && (
+
+            <div className="found-message">
+
+              <div className="found-message-icon">
+                🔎
+              </div>
+
+              <div>
+
+                <h3>
+                  Looking for this item?
+                </h3>
+
+                <p>
+                  If you think this is your
+                  lost item, you can contact
+                  the person who found it.
+                </p>
+
+              </div>
+
+            </div>
+
+          )}
+
+        </div>
+
+
+        {/* ================================================= */}
+        {/* ================= CLAIM MODAL =================== */}
+        {/* ================================================= */}
+
+        {showModal && (
+
+          <div
+            className="modal-overlay"
+            onClick={() =>
+              !claimLoading &&
+              setShowModal(false)
+            }
+          >
+
+            <div
+              className="claim-modal"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+
+              {/* CLOSE BUTTON */}
+
+              <button
+                className="close-btn"
+                onClick={() =>
+                  !claimLoading &&
+                  setShowModal(false)
+                }
+                disabled={claimLoading}
+              >
+                ✕
+              </button>
+
+
+              {/* CLAIM ICON */}
+
+              <div className="claim-icon">
+                🤝
+              </div>
+
+
+              {/* TITLE */}
+
+              <h2>
+                Claim This Item
+              </h2>
+
+
+              <p className="modal-description">
+
+                Tell the owner why you believe
+                this item belongs to you.
+
+              </p>
+
+
+              {/* ITEM PREVIEW */}
+
+              <div className="claim-item-preview">
+
+                <span>
+                  📦
+                </span>
+
+                <div>
+
+                  <strong>
+                    {item.itemName ||
+                      "Unnamed Item"}
+                  </strong>
+
+                  <small>
+                    {item.location ||
+                      "Location not specified"}
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              {/* MESSAGE */}
+
+              <label className="message-label">
+                Your Message
+              </label>
+
+              <textarea
+                value={message}
+                onChange={(e) =>
+                  setMessage(e.target.value)
+                }
+                placeholder="Example: This is my wallet. It contains my ID card..."
+                rows="5"
+                disabled={claimLoading}
+              />
+
+
+              {/* CHARACTER COUNT */}
+
+              <div className="character-count">
+                {message.length}/500
+              </div>
+
+
+              {/* BUTTONS */}
+
+              <div className="modal-buttons">
+
+                <button
+                  className="cancel-btn"
+                  onClick={() =>
+                    setShowModal(false)
+                  }
+                  disabled={claimLoading}
+                >
+                  Cancel
+                </button>
+
+
+                <button
+                  className="send-claim-btn"
+                  onClick={handleSubmit}
+                  disabled={claimLoading}
+                >
+
+                  {claimLoading
+                    ? "Sending..."
+                    : "Send Claim 🚀"}
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
         )}
+
       </div>
     </>
   );
