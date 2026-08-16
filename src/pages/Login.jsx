@@ -2,6 +2,34 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const decodeJwtPayload = (token) => {
+  try {
+    const base64Payload = token.split(".")[1];
+    if (!base64Payload) return {};
+
+    const normalized = base64Payload
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    console.error("JWT decode failed:", error);
+    return {};
+  }
+};
+
+const getUserIdFromResponse = (resData) => {
+  return (
+    resData?.user?.id ||
+    resData?.user?.userId ||
+    resData?.id ||
+    resData?.userId ||
+    resData?.user_id ||
+    null
+  );
+};
+
 function Login() {
   const navigate = useNavigate();
 
@@ -38,7 +66,23 @@ function Login() {
         throw new Error("No token returned from backend");
       }
 
+      const payload = decodeJwtPayload(token);
+      const responseUserId = getUserIdFromResponse(res.data);
+      const userId =
+        responseUserId ||
+        payload.userId ||
+        payload.id ||
+        payload.user_id ||
+        payload.sub ||
+        payload.user?.id ||
+        payload.user?.userId;
+
       localStorage.setItem("token", token);
+
+      if (userId) {
+        localStorage.setItem("userId", String(userId));
+      }
+
       navigate("/home", { replace: true });
     } catch (err) {
       console.error("LOGIN ERROR:", err.response?.data || err.message);

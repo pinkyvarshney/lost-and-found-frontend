@@ -15,6 +15,63 @@ export function ItemDetails() {
   const [claimLoading, setClaimLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const decodeJwtPayload = (token) => {
+    try {
+      const base64Payload = token.split(".")[1];
+      if (!base64Payload) return {};
+
+      const normalized = base64Payload
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+      const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+      return JSON.parse(atob(padded));
+    } catch (error) {
+      console.error("JWT decode failed:", error);
+      return {};
+    }
+  };
+
+  const fetchCurrentUserId = async (token) => {
+    const endpoints = [
+      "http://localhost:8080/auth/me",
+      "http://localhost:8080/users/me",
+      "http://localhost:8080/profile",
+      "http://localhost:8080/user/me",
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+        const userId =
+          data?.userId ||
+          data?.id ||
+          data?.user?.id ||
+          data?.user_id ||
+          data?._id ||
+          data?.user?.userId;
+
+        if (userId) {
+          localStorage.setItem("userId", String(userId));
+          return userId;
+        }
+      } catch (error) {
+        console.warn(`User profile endpoint failed: ${endpoint}`, error);
+      }
+    }
+
+    return null;
+  };
+
   // ================= GET ITEM DETAILS =================
   useEffect(() => {
     const fetchItem = async () => {
@@ -82,39 +139,33 @@ export function ItemDetails() {
 
       // ================= JWT PAYLOAD =================
 
-      const payload = JSON.parse(
-        atob(token.split(".")[1])
-      );
-
+      const payload = decodeJwtPayload(token);
       console.log("JWT PAYLOAD:", payload);
 
-      /*
-       * Talend ke according backend ko:
-       *
-       * {
-       *   itemId,
-       *   requesterId,
-       *   message
-       * }
-       *
-       * chahiye.
-       */
-
-      const requesterId =
+      const savedUserId = localStorage.getItem("userId");
+      let requesterId =
+        savedUserId ||
         payload.userId ||
         payload.id ||
-        payload.user_id;
+        payload.user_id ||
+        payload.sub ||
+        payload.user?.id ||
+        payload.user?.userId;
+
+      if (!requesterId) {
+        requesterId = await fetchCurrentUserId(token);
+      }
 
       if (!requesterId) {
         console.error(
-          "Requester ID not found in JWT:",
+          "Requester ID not found in JWT, saved user data, or current user profile:",
           payload
         );
 
-        alert(
-          "User ID not found in token. Please login again."
-        );
-
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        alert("User ID not found in token. Please login again.");
+        navigate("/");
         return;
       }
 
