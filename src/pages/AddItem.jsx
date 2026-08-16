@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
+const BASE_URL = "http://localhost:8080";
+
 function AddItem() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ function AddItem() {
       console.log("ITEM DATA:", itemData);
 
       const response = await axios.post(
-        "http://10.112.160.122:8080/items",
+        `${BASE_URL}/items`,
         itemData,
         {
           headers: {

@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
+const BASE_URL = "http://localhost:8080";
+
 function Home() {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState([]);
@@ -32,9 +34,7 @@ function Home() {
       console.log("TOKEN:", token);
 
       const res = await axios.get(
-        `http://10.112.160.122:8080/items/search?itemName=${encodeURIComponent(
-          search.trim()
-        )}`,
+        `${BASE_URL}/items/search?itemName=${encodeURIComponent(search.trim())}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -90,12 +90,14 @@ function Home() {
 
         <h2>🔍 Lost & Found</h2>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        {!window.location.pathname.includes("/login") && (
+          <button
+            className="logout-btn"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        )}
 
       </div>
 

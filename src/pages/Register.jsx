@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -15,34 +17,36 @@ function Login() {
     }
   }, [navigate]);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setError("");
+    setSuccess("");
 
-    if (!email || !password) {
-      setError("Please enter email and password");
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("Please fill in all fields");
       return;
     }
 
     try {
-      const res = await axios.post(
-        "http://localhost:8080/auth/login",
-        {
-          email: email,
-          password: password,
-        }
-      );
+      const res = await axios.post("http://localhost:8080/auth/register", {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
 
       const token = res.data?.token || res.data?.accessToken;
 
-      if (!token) {
-        throw new Error("No token returned from backend");
+      if (token) {
+        localStorage.setItem("token", token);
       }
 
-      localStorage.setItem("token", token);
-      navigate("/home", { replace: true });
+      setSuccess("Account created successfully ✅");
+      setTimeout(() => navigate("/home", { replace: true }), 800);
     } catch (err) {
-      console.error("LOGIN ERROR:", err.response?.data || err.message);
-      setError("Incorrect email or password ❌");
+      console.error("REGISTER ERROR:", err.response?.data || err.message);
+      setError(
+        err.response?.data?.message ||
+          "Unable to create account. Please try again."
+      );
     }
   };
 
@@ -59,7 +63,7 @@ function Login() {
     >
       <div
         style={{
-          width: "350px",
+          width: "380px",
           maxWidth: "100%",
           padding: "35px",
           borderRadius: "20px",
@@ -68,28 +72,31 @@ function Login() {
           textAlign: "center",
         }}
       >
-        <h1
-          style={{
-            marginBottom: "10px",
-            color: "#333",
-          }}
-        >
-          Lost & Found 🔍
-        </h1>
-
-        <p
-          style={{
-            color: "#777",
-            marginBottom: "25px",
-          }}
-        >
-          Login to continue
+        <h1 style={{ marginBottom: "10px", color: "#333" }}>Create Account</h1>
+        <p style={{ color: "#777", marginBottom: "25px" }}>
+          Sign up to continue
         </p>
 
-        {/* Email */}
+        <input
+          type="text"
+          placeholder="👤 Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "13px",
+            marginBottom: "15px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            outline: "none",
+            fontSize: "15px",
+          }}
+        />
+
         <input
           type="email"
-          placeholder="📧 Enter Email"
+          placeholder="📧 Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
@@ -104,10 +111,9 @@ function Login() {
           }}
         />
 
-        {/* Password */}
         <input
           type="password"
-          placeholder="🔒 Enter Password"
+          placeholder="🔒 Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -122,7 +128,6 @@ function Login() {
           }}
         />
 
-        {/* Error */}
         {error && (
           <div
             style={{
@@ -139,9 +144,24 @@ function Login() {
           </div>
         )}
 
-        {/* Login Button */}
+        {success && (
+          <div
+            style={{
+              background: "#e6f7e6",
+              color: "#2e7d32",
+              padding: "10px",
+              borderRadius: "8px",
+              marginBottom: "15px",
+              fontSize: "14px",
+              fontWeight: "600",
+            }}
+          >
+            {success}
+          </div>
+        )}
+
         <button
-          onClick={handleLogin}
+          onClick={handleRegister}
           style={{
             width: "100%",
             padding: "13px",
@@ -154,13 +174,13 @@ function Login() {
             cursor: "pointer",
           }}
         >
-          Login →
+          Create Account
         </button>
 
         <p style={{ marginTop: "18px", color: "#555", fontSize: "14px" }}>
-          Don’t have an account?{" "}
-          <Link to="/register" style={{ color: "#5f2c82", fontWeight: "bold" }}>
-            Sign Up
+          Already have an account?{" "}
+          <Link to="/login" style={{ color: "#5f2c82", fontWeight: "bold" }}>
+            Login
           </Link>
         </p>
       </div>
@@ -168,4 +188,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
